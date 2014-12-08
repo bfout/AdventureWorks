@@ -1,0 +1,25 @@
+﻿@using System.Web.Optimization
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AdventureWorks</title>
+    @Styles.Render("~/css")
+    @Scripts.Render("~/scripts/angular")
+    @Scripts.Render("~/scripts/app")
+</head>
+<body ng-app="main">
+    <div id="page">
+        <header class="container" ng-include="'/app/views/navbar.html'">
+        </header>
+        <section id="body" class="container">
+            <div ng-view class="app-container container"></div>
+        </section>
+        <hr />
+        <footer class="container">
+            FOOTER
+        </footer>
+    </div>
+</body>
+</html>

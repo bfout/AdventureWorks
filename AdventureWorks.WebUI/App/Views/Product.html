@@ -1,0 +1,8 @@
+﻿<h4>Product</h4>
+<div>
+    {{ message }}
+    <h4>{{ productName }}</h4>
+    <strong>{{ listPrice | currency }}</strong>
+    <p>{{ productDescription }}</p>
+    <img ng-src="api/product/getproductphoto?productphotoid={{ productPhotoId }}" alt="{{ productName }}" />
+</div>    
