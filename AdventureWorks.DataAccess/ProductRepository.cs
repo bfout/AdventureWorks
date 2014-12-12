@@ -2,9 +2,9 @@
 using AdventureWorks.DomainModels;
 using System;
 using System.Configuration;
-using System.Data;
-using System.Data.SqlClient;
 using System.Collections.Generic;
+using System.Data;
+using System.Linq;
 
 namespace AdventureWorks.DataAccess
 {
@@ -13,32 +13,25 @@ namespace AdventureWorks.DataAccess
         public List<ProductSummary> GetProductSummaries()
         {
             var productSummaries = new List<ProductSummary>();
-            var connectionString = ConfigurationManager.ConnectionStrings["AdventureWorks"].ConnectionString;
 
-            using (var conn = new SqlConnection(connectionString)) 
+            var context = new AdventureWorks2014Entities();
+
+            var products = context.Products.Where(o => o.FinishedGoodsFlag);
+
+            foreach (var product in products)
             {
-                conn.Open();
-                using (var cmd = new SqlCommand("GetProductSummaries", conn))
-                {
-                    cmd.CommandType = CommandType.StoredProcedure;
+                var productSummary = new ProductSummary();
 
-                    using (var rdr = cmd.ExecuteReader())
-                    {
-                        while (rdr.Read())
-                        {
-                            var productSummary = new ProductSummary();
+                productSummary.ListPrice = product.ListPrice;
+                productSummary.ProductId = product.ProductID;
+                productSummary.ProductName = product.Name;
 
-                            productSummary.ListPrice = (decimal) rdr["ListPrice"];
-                            productSummary.ProductDescription = rdr["ProductDescription"].ToString();
-                            productSummary.ProductId = (int) rdr["ProductId"];
-                            productSummary.ProductName = rdr["ProductName"].ToString();
-                            productSummary.ProductPhotoId = (int)rdr["ProductPhotoId"];
+                var ppp = product.ProductProductPhotoes.FirstOrDefault();
 
-                            productSummaries.Add(productSummary);
-                        }
-                    }
-                }
-                conn.Close();
+                if (ppp != null)
+                    productSummary.ProductPhotoId = product.ProductProductPhotoes.First().ProductPhotoID;
+
+                productSummaries.Add(productSummary);
             }
 
             return productSummaries;   
@@ -46,80 +39,52 @@ namespace AdventureWorks.DataAccess
 
         public byte[] GetProductPhoto(int productPhotoId)
         {
-            Byte[] photo= null;
-            var connectionString = ConfigurationManager.ConnectionStrings["AdventureWorks"].ConnectionString;
+            var context = new AdventureWorks2014Entities();
 
-            using (var conn = new SqlConnection(connectionString))
-            {
-                conn.Open();
-                using (var cmd = new SqlCommand("GetProductPhoto", conn))
-                {
-                    cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.Parameters.Add(new SqlParameter("@productphotoid", productPhotoId));
+            var productPhoto = context.ProductPhotoes.FirstOrDefault(o => o.ProductPhotoID == productPhotoId);
 
-                    using (var rdr = cmd.ExecuteReader())
-                    {
-                        if (rdr.Read())
-                            photo = (byte[])rdr["largephoto"];
-                    }
-                }
-                conn.Close();
-            }
+            if (productPhoto != null)
+                return productPhoto.LargePhoto;
 
-            return photo;
+            return null;
         }
 
         public byte[] GetProductThumbnailPhoto(int productPhotoId)
         {
-            Byte[] photo = null;
-            var connectionString = ConfigurationManager.ConnectionStrings["AdventureWorks"].ConnectionString;
+            var context = new AdventureWorks2014Entities();
 
-            using (var conn = new SqlConnection(connectionString))
-            {
-                conn.Open();
-                using (var cmd = new SqlCommand("GetProductThumbnailPhoto", conn))
-                {
-                    cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.Parameters.Add(new SqlParameter("@productphotoid", productPhotoId));
+            var productPhoto = context.ProductPhotoes.FirstOrDefault(o => o.ProductPhotoID == productPhotoId);
 
-                    using (var rdr = cmd.ExecuteReader())
-                    {
-                        if (rdr.Read())
-                            photo = (byte[])rdr["thumbnailphoto"];
-                    }
-                }
-                conn.Close();
-            }
+            if (productPhoto != null)
+                return productPhoto.ThumbNailPhoto;
 
-            return photo;
+            return null;
         }
 
         public ProductDetail GetProductDetail(int productId)
         {
             var productDetail = new ProductDetail();
-            var connectionString = ConfigurationManager.ConnectionStrings["AdventureWorks"].ConnectionString;
 
-            using (var conn = new SqlConnection(connectionString))
+            var context = new AdventureWorks2014Entities();
+
+            var product = context.Products.FirstOrDefault(o => o.ProductID == productId);
+
+            if (product != null)
             {
-                conn.Open();
-                using (var cmd = new SqlCommand("GetProductDetail", conn))
-                {
-                    cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.Parameters.Add(new SqlParameter("@productId", productId));
+                productDetail.ListPrice = product.ListPrice;
+                productDetail.ProductId = product.ProductID;
+                productDetail.ProductName = product.Name;
 
-                    using (var rdr = cmd.ExecuteReader())
-                    {
-                        while (rdr.Read())
-                        {
-                            productDetail.ListPrice = (decimal)rdr["ListPrice"];
-                            productDetail.ProductDescription = rdr["ProductDescription"].ToString();
-                            productDetail.ProductId = (int)rdr["ProductId"];
-                            productDetail.ProductName = rdr["ProductName"].ToString();
-                            productDetail.ProductPhotoId = (int)rdr["ProductPhotoId"];
-                        }
-                    }
-                }
-                conn.Close();
+                var pmpdc = product.ProductModel.ProductModelProductDescriptionCultures
+                                                .FirstOrDefault(o => o.Culture.Name == "en");
+
+                if (pmpdc != null)
+                    productDetail.ProductDescription = pmpdc.ProductDescription.Description;
+
+                var ppp = product.ProductProductPhotoes.FirstOrDefault();
+
+                if (ppp != null)
+                    productDetail.ProductPhotoId = product.ProductProductPhotoes.First().ProductPhotoID;
             }
 
             return productDetail;

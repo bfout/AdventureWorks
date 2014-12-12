@@ -9,7 +9,9 @@ namespace AdventureWorks.WebUI
         {
             bundles.Add(new StyleBundle("~/css").Include("~/css/bootstrap.css")
                                                 .Include("~/css/amelia.bootstrap.css")
-                                                .Include("~/css/site.css"));
+                                                .Include("~/css/font-awesome.css")
+                                                .Include("~/css/site.css")
+                                                .Include("~/css/angular-block-ui.css"));
 
             bundles.Add(new ScriptBundle("~/scripts/angular").Include("~/scripts/angular.js")
                                                              .Include("~/scripts/angular-route.js")

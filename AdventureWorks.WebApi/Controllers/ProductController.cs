@@ -1,4 +1,5 @@
-﻿using AdventureWorks.BusinessLogic.Interfaces;
+﻿using System.Threading;
+using AdventureWorks.BusinessLogic.Interfaces;
 using System;
 using System.IO;
 using System.Linq;
@@ -28,7 +29,6 @@ namespace AdventureWorks.WebApi.Controllers
                 var productSummaries = _productHandler.GetProductSummaries().Select(o => new ProductSummary
                     {
                         ListPrice = o.ListPrice,
-                        ProductDescription = o.ProductDescription,
                         ProductId = o.ProductId,
                         ProductName = o.ProductName,
                         ProductPhotoId = o.ProductPhotoId
@@ -38,7 +38,7 @@ namespace AdventureWorks.WebApi.Controllers
             }
             catch (Exception ex)
             {
-                httpResponseMessage = Request.CreateResponse(HttpStatusCode.InternalServerError, ex.InnerException.Message);
+                httpResponseMessage = Request.CreateResponse(HttpStatusCode.InternalServerError, ex.InnerException);
             }
 
             return httpResponseMessage;
